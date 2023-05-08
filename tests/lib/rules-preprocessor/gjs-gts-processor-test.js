@@ -35,6 +35,7 @@ function initESLint(options) {
       plugins: ['ember'],
       extends: ['plugin:ember/recommended'],
       rules: {
+        quotes: ['error', 'single'],
         'lines-between-class-members': 'error',
         'no-undef': 'error',
         'no-unused-vars': 'error',
@@ -171,7 +172,7 @@ const invalid = [
       import Component from '@glimmer/component';
 
       export default class MyComponent extends Component {
-        foo = "bar";
+        foo = 'bar';
         <template>"hi"</template>
       }
     `,
@@ -191,12 +192,43 @@ const invalid = [
       import Component from '@glimmer/component';
 
       export default class MyComponent extends Component {
-        foo = "bar";
+        foo = 'bar';
         <template>"hi"
         </template>
       }
     `,
     errors: [
+      {
+        message: 'Expected blank line between class members.',
+        line: 6,
+        endLine: 7,
+        column: 9,
+        endColumn: 20,
+      },
+    ],
+  },
+  {
+    filename: 'my-component.gjs',
+    code: `
+      import Component from "@glimmer/component";
+
+      export default class MyComponent extends Component {
+        foo = 'bar';
+        <template>"hi"
+        </template>
+      }
+    `,
+    errors: [
+      {
+        message: 'Strings must use singlequote.',
+        line: 2,
+        endLine: 2,
+        endColumn: 49,
+        column: 29,
+        fix: {
+          range: [29, 49],
+        },
+      },
       {
         message: 'Expected blank line between class members.',
         line: 6,
@@ -388,7 +420,7 @@ describe('multiple tokens in same file', () => {
   it('handles duplicate template tokens', async () => {
     const eslint = initESLint();
     const code = `
-      // comment Bad 
+      // comment Bad
 
       const tmpl = <template><Bad /></template>
     `;
